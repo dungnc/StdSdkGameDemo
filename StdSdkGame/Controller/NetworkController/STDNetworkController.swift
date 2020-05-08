@@ -9,13 +9,6 @@
 import UIKit
 import Foundation
 
-var kDomain = "https://stagmsdk.1tap.vn/"
-var kSDKSecretKey = "demomogamesdk123"
-var kSDKAppKey = "demomogamesdk"
-var kSDKClientOS = "ios"
-var kSecretKey = "c3556e0597414d989a1b391bfe30a676"
-var kGoogleClientId = "794169653863-73i2n4g8a2nn4rdi9rfp911cv2vo09gu.apps.googleusercontent.com"
-
 @objc public class STDNetworkController: NSObject {
     @objc public static let shared = STDNetworkController()
     
@@ -52,10 +45,11 @@ var kGoogleClientId = "794169653863-73i2n4g8a2nn4rdi9rfp911cv2vo09gu.apps.google
         
     }
     
-    @objc public func configSDKWith(_ sdkSecretKey: String, _ sdkAppkey: String, _ googleClientId: String) {
+    @objc public func configSDKWith(_ sdkSecretKey: String, _ sdkAppkey: String, _ googleClientId: String, _ paymentSecretKey: String) {
         kSDKSecretKey = sdkSecretKey
         kSDKAppKey = sdkAppkey
         kGoogleClientId = googleClientId
+        kSecretKey = paymentSecretKey
     }
     
     //MARK: - Package
@@ -519,6 +513,7 @@ var kGoogleClientId = "794169653863-73i2n4g8a2nn4rdi9rfp911cv2vo09gu.apps.google
     //MARK: - Config
     
     @objc public func getConfig( _ success:(@escaping(_ urlModel: STDURLModel?, _ error: String?) -> Void)) {
+        let urlString = String(format: "%@config.html", kGetConfigDomain)
         if let path = Bundle.main.path(forResource: "Info", ofType: "plist") {
            let dict = NSDictionary(contentsOfFile: path)
             if let sdkAppKey = dict?["SDKAppKey"] as? String {
@@ -531,7 +526,7 @@ var kGoogleClientId = "794169653863-73i2n4g8a2nn4rdi9rfp911cv2vo09gu.apps.google
                 kGoogleClientId = googleClientID
             }
         }
-        let urlString = String(format: "%@config.html", kDomain)
+
         let timeCurrent = STDAppDataSingleton.sharedInstance.getTimeCurrent()
         
         let plainText = String(format: "%@%@%@", kSDKAppKey, "1.0.1", timeCurrent)

@@ -49,13 +49,30 @@ import GoogleSignIn
     
     override public func viewDidLoad() {
         super.viewDidLoad()
-        STDNetworkController.shared.getConfig { (_, _) in
-            
+        
+        if STDAppDataSingleton.sharedInstance.urlsConfig == nil {
+            tryGetConfig(count: 0)
         }
         nameTF.text = STDAppDataSingleton.sharedInstance.lastUserName
         GIDSignIn.sharedInstance()?.clientID = kGoogleClientId
         setupData()
         
+    }
+    
+    private func tryGetConfig(count: Int) {
+        
+        
+        STDNetworkController.shared.getConfig { [weak self] (config, error) in
+            if error != nil {
+                if count == 3 {
+                    STDAlertController.showAlertController(title: "Thông báo", message: error, nil)
+                } else {
+                    self?.tryGetConfig(count: count + 1)
+                }
+            } else {
+                return
+            }
+        }
     }
     
     override public func viewWillAppear(_ animated: Bool) {
@@ -102,7 +119,7 @@ import GoogleSignIn
     
     private func setupData() {
         GIDSignIn.sharedInstance()?.presentingViewController = self
-//        GIDSignIn.sharedInstance()?.restorePreviousSignIn()
+        GIDSignIn.sharedInstance()?.restorePreviousSignIn()
         if #available(iOS 13.0, *) {
             signInAppleButton.isHidden = false
         } else {
@@ -132,11 +149,11 @@ import GoogleSignIn
         let loginManager = LoginManager()
         loginManager.logIn(permissions: ["public_profile", "email"], from: self) { [weak self] (result, error) in
             if let error = error {
-                success(nil, nil, "Đã xảy ra lỗi")
+                success(nil, nil, "Đã xảy ra lỗi".localizable)
                 return
             }
             if result?.isCancelled == true {
-                success(nil, nil, "Đã huỷ")
+                success(nil, nil, "Đã huỷ".localizable)
                 return
             }
             success(result?.token?.tokenString, result?.token?.userID, nil)
@@ -149,23 +166,23 @@ import GoogleSignIn
         failPasswordLabel.text = ""
         
         if nameTF.text?.count == 0 {
-            failNameLabel.text = "Vui lòng nhập tên đăng nhập"
+            failNameLabel.text = "Vui lòng nhập tên đăng nhập".localizable
             return false
         }
         
         if nameTF.text?.userNameIsValid() == false {
-            failNameLabel.text = "Tên đăng nhập không đúng định dạng"
+            failNameLabel.text = "Tên đăng nhập không đúng định dạng".localizable
             return false
         }
         
         if passwordTF.text?.count == 0 {
-            failPasswordLabel.text = "Vui lòng nhập mật khẩu"
+            failPasswordLabel.text = "Vui lòng nhập mật khẩu".localizable
             return false
         }
         
         if captchaView.isHidden == false {
             if captchaLabel.text != captchaTF.text {
-                STDAlertController.showAlertController(title: "Thông báo", message: "Vui lòng nhập mã captcha chính xác", nil)
+                STDAlertController.showAlertController(title: "Thông báo".localizable, message: "Vui lòng nhập mã captcha chính xác".localizable, nil)
                 generateCaptcha()
                 return false
             }
@@ -181,7 +198,7 @@ import GoogleSignIn
         failEmailLabel.text = ""
         failPhoneLabel.text = ""
         guard let nameRegister = nameRegisterTF.text else {
-            failNameRegisterLabel.text = "Vui lòng nhập tên đăng nhập"
+            failNameRegisterLabel.text = "Vui lòng nhập tên đăng nhập".localizable
             return false
         }
         
@@ -355,7 +372,9 @@ import GoogleSignIn
                 STDAppDataSingleton.sharedInstance.userProfileModel = userModel
                 self?.didFinishLogin?(userModel)
             } else {
-                STDAlertController.showAlertController(title: "Thông báo", message: error, nil)
+                DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1, execute: {
+                    STDAlertController.showAlertController(title: "Thông báo", message: error, nil)
+                })
             }
         }
     }
@@ -594,15 +613,6 @@ extension STDAuthenticationVC: ASAuthorizationControllerDelegate, ASAuthorizatio
     
     @available(iOS 13.0, *)
     public func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
-        if let appleIDCredential = authorization.credential as? ASAuthorizationAppleIDCredential {
-            // Create an account in your system.
-            let userIdentifier = appleIDCredential.user
-            let userFirstName = appleIDCredential.fullName?.givenName
-            let userLastName = appleIDCredential.fullName?.familyName
-            let userEmail = appleIDCredential.email
-            print(userEmail)
-            //Navigate to other view controller
-        }
         signInAppleWithAuthorization(authorization: authorization)
     }
     @available(iOS 13.0, *)
