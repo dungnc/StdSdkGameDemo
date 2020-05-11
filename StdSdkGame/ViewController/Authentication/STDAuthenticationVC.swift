@@ -119,7 +119,6 @@ import GoogleSignIn
     
     private func setupData() {
         GIDSignIn.sharedInstance()?.presentingViewController = self
-        GIDSignIn.sharedInstance()?.restorePreviousSignIn()
         if #available(iOS 13.0, *) {
             signInAppleButton.isHidden = false
         } else {
