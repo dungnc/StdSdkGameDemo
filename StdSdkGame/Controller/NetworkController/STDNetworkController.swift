@@ -376,6 +376,11 @@ import Foundation
                 return
             }
             
+            if (result as? String) != nil {
+                success(true, (result as? String));
+                return
+            }
+            
             success(nil, "Đã xảy ra lỗi");
         }
     }
