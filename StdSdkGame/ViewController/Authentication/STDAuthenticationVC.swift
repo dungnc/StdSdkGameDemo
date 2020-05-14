@@ -54,7 +54,6 @@ import GoogleSignIn
             tryGetConfig(count: 0)
         }
         nameTF.text = STDAppDataSingleton.sharedInstance.lastUserName
-        GIDSignIn.sharedInstance()?.clientID = kGoogleClientId
         setupData()
         
     }
