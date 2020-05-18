@@ -535,9 +535,9 @@ import GoogleSignIn
     
     @IBAction func didClickLoginGoogle(_ sender: Any) {
         view.endEditing(true)
+        GIDSignIn.sharedInstance()?.clientID = kGoogleClientId
         GIDSignIn.sharedInstance().delegate = self
         GIDSignIn.sharedInstance().presentingViewController = self
-        GIDSignIn.sharedInstance()?.signOut()
         GIDSignIn.sharedInstance()?.signIn()
     }
     
