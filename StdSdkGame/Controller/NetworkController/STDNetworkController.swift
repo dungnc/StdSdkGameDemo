@@ -11,9 +11,24 @@ import Foundation
 
 @objc public class STDNetworkController: NSObject {
     @objc public static let shared = STDNetworkController()
-    
+    private var observer: NSObjectProtocol?
+
     private override init() {
         super.init()
+        observer = NotificationCenter.default.addObserver(forName: UIApplication.willEnterForegroundNotification, object: nil, queue: .main) { _ in
+            STDNetworkController.shared.checkUserDidLogin { (user, error) in
+                if user == nil {
+                    STDAppDataSingleton.sharedInstance.userProfileModel = nil
+                    STDAppDataSingleton.sharedInstance.lastUserName = ""
+                }
+            }
+        }
+    }
+    
+    deinit {
+        if let observer = observer {
+            NotificationCenter.default.removeObserver(observer)
+        }
     }
     
     @objc public func checkUserDidLogin(_ success:(@escaping(_ userModel: STDUserModel?, _ error: String?) -> Void)) {
@@ -23,6 +38,7 @@ import Foundation
         }
         
         guard let urlConfig = STDAppDataSingleton.sharedInstance.urlsConfig?.uRLSynQuickDevice, urlConfig.count > 0 else {
+            success(nil, nil)
             return
         }
         

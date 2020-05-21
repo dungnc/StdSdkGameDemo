@@ -28,7 +28,24 @@ enum Defaults {
     
     @objc public static let sharedInstance = STDAppDataSingleton()
     
-    @objc public var urlsConfig: STDURLModel?
+    @objc public var urlsConfig: STDURLModel? {
+        get {
+                if let urlModelDict = Defaults.object(forKey: "kUrlModelDict") as? [String : Any], urlModelDict.count != 0 {
+                    return STDURLModel.init(fromDictionary: urlModelDict)
+                }
+        
+                return nil
+            }
+            
+            set(urlModelDict) {
+                if urlModelDict != nil {
+                    let dict = urlModelDict!.toDictionary()
+                    Defaults.set(dict, forKey: "kUrlModelDict")
+                } else {
+                    Defaults.set([:], forKey: "kUrlModelDict")
+                }
+            }
+    }
     @objc public var serverID: String?
     @objc public var orderID: String = ""
     @objc public var debugsString: String = ""
